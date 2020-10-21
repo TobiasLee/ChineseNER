@@ -8,9 +8,9 @@ DATA_DIR=cluener_bios
 BERT_PATH=bert-wwm-ext
 MAX_LENGTH=128
 LEARNING_RATE=3e-5 
-EPOCH=3.0
+NUM_EPOCH=3.0
 python3 token-classification/run_ner.py \
-   --data_dir $DATA_DIR --learning_rate $LEARNING_RATE --train_epochs $EPOCH \
+   --data_dir $DATA_DIR --learning_rate $LEARNING_RATE \
    --labels $DATA_DIR/labels.txt \
    --model_name_or_path $BERT_PATH \
    --output_dir $OUTPUT_DIR \
