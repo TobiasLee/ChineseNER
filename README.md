@@ -14,16 +14,16 @@
 > sh download.sh 
 
 ## Run
-
 > sh ner.sh 
 
-
 ## Result
-> 
-eval_loss = 0.1966591328382492
-eval_accuracy_score = 0.9433744528452049
-eval_precision = 0.7343796268877703
-eval_recall = 0.8072916666666666
-eval_f1 = 0.7691114901535123
-epoch = 3.0
-total_flos = 2518344871345152
+**Result on the dev set**
+eval_loss = 0.196659132838
+
+eval_accuracy_score = 0.94337445
+
+eval_precision = 0.734379626
+
+eval_recall = 0.807291666
+
+eval_f1 = 0.7691114901
