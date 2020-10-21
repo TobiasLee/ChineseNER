@@ -18,4 +18,11 @@
 > sh ner.sh 
 
 
-
+# Result
+eval_loss = 0.1966591328382492
+eval_accuracy_score = 0.9433744528452049
+eval_precision = 0.7343796268877703
+eval_recall = 0.8072916666666666
+eval_f1 = 0.7691114901535123
+epoch = 3.0
+total_flos = 2518344871345152
