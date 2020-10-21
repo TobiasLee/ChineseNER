@@ -13,12 +13,13 @@
 
 > sh download.sh 
 
-# Run
+## Run
 
 > sh ner.sh 
 
 
-# Result
+## Result
+> 
 eval_loss = 0.1966591328382492
 eval_accuracy_score = 0.9433744528452049
 eval_precision = 0.7343796268877703
