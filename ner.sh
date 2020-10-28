@@ -9,6 +9,7 @@ BERT_PATH=bert-wwm-ext
 MAX_LENGTH=128
 LEARNING_RATE=3e-5 
 NUM_EPOCH=3.0
+LOSS_TYPE=CrossEntropyLoss
 python3 token-classification/run_ner.py \
    --data_dir $DATA_DIR --learning_rate $LEARNING_RATE \
    --labels $DATA_DIR/labels.txt \
@@ -19,6 +20,7 @@ python3 token-classification/run_ner.py \
    --per_device_train_batch_size $BATCH_SIZE \
    --save_steps $SAVE_STEPS \
    --seed $SEED \
+   --loss_type $LOSS_TYPE \
    --do_train \
    --do_eval \
    --do_predict

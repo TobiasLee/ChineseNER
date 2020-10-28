@@ -20,10 +20,12 @@ import sys
 from dataclasses import dataclass, field
 from importlib import import_module
 from typing import Dict, List, Optional, Tuple
-
+import torch
 import numpy as np
 from seqeval.metrics import accuracy_score, f1_score, precision_score, recall_score
 from torch import nn
+from losses import DiceLoss, FocalLoss, LabelSmoothingCrossEntropy
+from torch.nn import CrossEntropyLoss
 
 from transformers import (
     AutoConfig,
@@ -65,6 +67,9 @@ class ModelArguments:
     cache_dir: Optional[str] = field(
         default=None, metadata={"help": "Where do you want to store the pretrained models downloaded from s3"}
     )
+    loss_type: Optional[str] = field(
+        default='CrossEntropyLoss', metadata={"help": "The loss used during training."}
+    )
 
 
 @dataclass
@@ -90,6 +95,41 @@ class DataTrainingArguments:
     overwrite_cache: bool = field(
         default=False, metadata={"help": "Overwrite the cached training and evaluation sets"}
     )
+
+
+class TrainerWithSpecifiedLoss(Trainer):
+    def __init__(self, model, args, train_dataset, eval_dataset, compute_metrics, loss_type):
+        Trainer.__init__(self, model=model, args=args, train_dataset=train_dataset, eval_dataset=eval_dataset,
+                         compute_metrics=compute_metrics)
+        if loss_type == 'DiceLoss':
+            self.loss_fct = DiceLoss()
+        elif loss_type == 'FocalLoss':
+            self.loss_fct = FocalLoss()
+        elif loss_type == 'LabelSmoothingCrossEntropy':
+            self.loss_fct = LabelSmoothingCrossEntropy()
+        elif loss_type == 'CrossEntropyLoss':
+            self.loss_fct = CrossEntropyLoss()
+        else:
+            raise ValueError("Doesn't support such loss type")
+
+    def compute_loss(self, model, inputs):
+        outputs = model(**inputs)
+        logits = outputs[1]  # [bsz, max_token_len, class_num]
+        labels = inputs['labels']  # [bsz, max_token_len]
+        attention_mask = inputs['attention_mask']  # [bsz, max_token_len]
+        loss = None
+        if labels is not None:
+            # Only keep active parts of the loss
+            if attention_mask is not None:
+                active_loss = attention_mask.view(-1) == 1
+                active_logits = logits.view(-1, model.module.num_labels)  # [bsz * max_token_len, class_num]
+                active_labels = torch.where(
+                    active_loss, labels.view(-1), torch.tensor(self.loss_fct.ignore_index).type_as(labels)
+                )  # [bsz * max_token_len]
+                loss = self.loss_fct(active_logits, active_labels)
+            else:
+                loss = self.loss_fct(logits.view(-1, model.module.num_labels), labels.view(-1))
+        return loss
 
 
 def main():
@@ -230,12 +270,13 @@ def main():
         }
 
     # Initialize our Trainer
-    trainer = Trainer(
+    trainer = TrainerWithSpecifiedLoss(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         compute_metrics=compute_metrics,
+        loss_type=model_args.loss_type
     )
 
     # Training
