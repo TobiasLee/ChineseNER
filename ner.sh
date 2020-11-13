@@ -1,10 +1,9 @@
-
 OUTPUT_DIR=cluener-model
 BATCH_SIZE=32
 NUM_EPOCHS=3
 SAVE_STEPS=750
 SEED=888
-DATA_DIR=cluener_bios
+DATA_DIR=cluener_bios/aug
 BERT_PATH=bert-wwm-ext
 MAX_LENGTH=128
 LEARNING_RATE=3e-5 

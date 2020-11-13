@@ -1,8 +1,6 @@
 import json
 
 
-
-
 def read_json(input_file):
     lines = []
     with open(input_file, 'r') as f:
@@ -17,7 +15,7 @@ def read_json(input_file):
                 for key, value in label_entities.items():
                     for sub_name, sub_index in value.items():
                         for start_index, end_index in sub_index:
-                            all_spans.append((key, sub_name, start_index, end_index ))
+                            all_spans.append((key, sub_name, start_index, end_index))
 
                 all_spans = sorted(all_spans, key=lambda x: x[3] - x[2])
                 for key, sub_name, start_index, end_index in all_spans:
