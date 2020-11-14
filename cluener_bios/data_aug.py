@@ -1,5 +1,7 @@
 from ner import Ner
 import argparse
+import os
+import shutil
 
 data_augument_tag_list = ['address',
                           'book',
@@ -34,11 +36,16 @@ if __name__ == '__main__':
     aug_samples, aug_sample_tags = ner.augment(file_name='%s.txt' % file_name)
 
     if dedup:
-        target_file = 'aug_dedup_%d/%s.txt' % (augument_size, file_name)
+        target_dir = 'aug_dedup_%d' % augument_size
     else:
-        target_file = 'aug_%d/%s.txt' % (augument_size, file_name)
-    with open(target_file, 'w', encoding='utf-8') as f:
+        target_dir = 'aug_%d' % augument_size
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
+    with open(os.path.join(target_dir, '%s.txt' % file_name), 'w', encoding='utf-8') as f:
         for tokens, tags in zip(aug_samples, aug_sample_tags):
             for token, tag in zip(tokens, tags):
                 f.write("%s %s\n" % (token, tag))
             f.write("\n")
+
+    for file in ['dev.txt', 'labels.txt']:
+        shutil.copy(file, os.path.join(target_dir, file))

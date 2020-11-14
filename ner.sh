@@ -1,14 +1,14 @@
-OUTPUT_DIR=cluener-model
-BATCH_SIZE=32
-NUM_EPOCHS=3
+OUTPUT_DIR=results/roberta-large
+BATCH_SIZE=8
+NUM_EPOCHS=10
 SAVE_STEPS=750
 SEED=888
-DATA_DIR=cluener_bios/aug
-BERT_PATH=bert-wwm-ext
+DATA_DIR=cluener_bios/
+BERT_PATH=roberta-wwm-ext-large
 MAX_LENGTH=128
 LEARNING_RATE=3e-5 
-NUM_EPOCH=3.0
 LOSS_TYPE=CrossEntropyLoss
+LOGGING_STEPS=100
 python3 token-classification/run_ner.py \
    --data_dir $DATA_DIR --learning_rate $LEARNING_RATE \
    --labels $DATA_DIR/labels.txt \
@@ -22,4 +22,9 @@ python3 token-classification/run_ner.py \
    --loss_type $LOSS_TYPE \
    --do_train \
    --do_eval \
-   --do_predict
+   --evaluate_during_training \
+   --logging_steps $LOGGING_STEPS \
+   --load_best_model_at_end \
+   --metric_for_best_model f1 \
+   --logging_dir $OUTPUT_DIR"/runs/"
+

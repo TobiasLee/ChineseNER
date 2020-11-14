@@ -263,10 +263,10 @@ def main():
     def compute_metrics(p: EvalPrediction) -> Dict:
         preds_list, out_label_list = align_predictions(p.predictions, p.label_ids)
         return {
-            "accuracy_score": accuracy_score(out_label_list, preds_list),
-            "precision": precision_score(out_label_list, preds_list),
-            "recall": recall_score(out_label_list, preds_list),
-            "f1": f1_score(out_label_list, preds_list),
+            "accuracy_score": accuracy_score(out_label_list, preds_list) * 100,
+            "precision": precision_score(out_label_list, preds_list) * 100,
+            "recall": recall_score(out_label_list, preds_list) * 100,
+            "f1": f1_score(out_label_list, preds_list) * 100,
         }
 
     # Initialize our Trainer
@@ -302,8 +302,8 @@ def main():
             with open(output_eval_file, "w") as writer:
                 logger.info("***** Eval results *****")
                 for key, value in result.items():
-                    logger.info("  %s = %s", key, value)
-                    writer.write("%s = %s\n" % (key, value))
+                    logger.info("  %s = %.2f", key, value)
+                    writer.write("%s = %.2f\n" % (key, value))
 
             results.update(result)
 
@@ -336,6 +336,19 @@ def main():
             with open(output_test_predictions_file, "w") as writer:
                 with open(os.path.join(data_args.data_dir, "test.txt"), "r") as f:
                     token_classification_task.write_predictions_to_file(writer, f, preds_list)
+
+    # log config
+    output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
+    with open(output_eval_file, "a") as writer:
+        hyper_params = str(
+            torch.load(open(os.path.join(training_args.output_dir, "training_args.bin"), 'rb'))).split(',')
+        for i, para in enumerate(hyper_params):
+            if i == 0:
+                para = para.replace("TrainingArguments(", '')
+            if i == len(hyper_params) - 1:
+                para = para.replace(")", '')
+            para = para.replace(' ', '')
+            writer.write(para + '\n')
 
     return results
 
