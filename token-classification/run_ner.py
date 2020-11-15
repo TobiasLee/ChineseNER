@@ -38,7 +38,7 @@ from transformers import (
     set_seed,
 )
 from utils_ner import Split, TokenClassificationDataset, TokenClassificationTask
-
+from evaluation_util import * 
 
 logger = logging.getLogger(__name__)
 
@@ -336,7 +336,15 @@ def main():
             with open(output_test_predictions_file, "w") as writer:
                 with open(os.path.join(data_args.data_dir, "test.txt"), "r") as f:
                     token_classification_task.write_predictions_to_file(writer, f, preds_list)
-
+            logger.info("running CLUENER2020 Evaluation")
+            # evaluate according to CLUENER2020
+            prediction_json_lines = convert_bios_to_json_lines(output_test_predictions_file)
+            print(prediction_json_lines[:5])
+            entity_f1_dict, marco_f1 = get_f1_score(pre_lines=prediction_json_lines,
+                                                gold_file=os.path.join(data_args.data_dir, "dev.json"))
+        
+            print(entity_f1_dict)
+            logger.info("Macro f1: %.3f" % marco_f1)
     # log config
     output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
     with open(output_eval_file, "a") as writer:
