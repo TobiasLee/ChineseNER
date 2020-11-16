@@ -307,6 +307,18 @@ def main():
 
             results.update(result)
 
+        # log config
+        with open(output_eval_file, "a") as writer:
+            hyper_params = str(
+                torch.load(open(os.path.join(training_args.output_dir, "training_args.bin"), 'rb'))).split(',')
+            for i, para in enumerate(hyper_params):
+                if i == 0:
+                    para = para.replace("TrainingArguments(", '')
+                if i == len(hyper_params) - 1:
+                    para = para.replace(")", '')
+                para = para.replace(' ', '')
+                writer.write(para + '\n')
+
     # Predict
     if training_args.do_predict:
         test_dataset = TokenClassificationDataset(
@@ -323,14 +335,8 @@ def main():
         predictions, label_ids, metrics = trainer.predict(test_dataset)
         preds_list, _ = align_predictions(predictions, label_ids)
 
-        output_test_results_file = os.path.join(training_args.output_dir, "test_results.txt")
-        if trainer.is_world_master():
-            with open(output_test_results_file, "w") as writer:
-                for key, value in metrics.items():
-                    logger.info("  %s = %s", key, value)
-                    writer.write("%s = %s\n" % (key, value))
-
         # Save predictions
+        output_test_results_file = os.path.join(training_args.output_dir, "test_results.txt")
         output_test_predictions_file = os.path.join(training_args.output_dir, "test_predictions.txt")
         if trainer.is_world_master():
             with open(output_test_predictions_file, "w") as writer:
@@ -339,24 +345,15 @@ def main():
             logger.info("running CLUENER2020 Evaluation")
             # evaluate according to CLUENER2020
             prediction_json_lines = convert_bios_to_json_lines(output_test_predictions_file)
-            print(prediction_json_lines[:5])
+            logger.info(prediction_json_lines[:5])
             entity_f1_dict, marco_f1 = get_f1_score(pre_lines=prediction_json_lines,
                                                 gold_file=os.path.join(data_args.data_dir, "dev.json"))
-        
-            print(entity_f1_dict)
-            logger.info("Macro f1: %.3f" % marco_f1)
-    # log config
-    output_eval_file = os.path.join(training_args.output_dir, "eval_results.txt")
-    with open(output_eval_file, "a") as writer:
-        hyper_params = str(
-            torch.load(open(os.path.join(training_args.output_dir, "training_args.bin"), 'rb'))).split(',')
-        for i, para in enumerate(hyper_params):
-            if i == 0:
-                para = para.replace("TrainingArguments(", '')
-            if i == len(hyper_params) - 1:
-                para = para.replace(")", '')
-            para = para.replace(' ', '')
-            writer.write(para + '\n')
+
+            with open(output_test_results_file, "w") as writer:
+                for key, value in entity_f1_dict.items():
+                    logger.info('%s: %.2f' % (key, value))
+                    writer.write('%s: %.2f\n' % (key, value))
+            logger.info("Macro f1: %.2f" % marco_f1)
 
     return results
 

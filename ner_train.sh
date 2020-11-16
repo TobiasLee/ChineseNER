@@ -17,6 +17,7 @@ python3 token-classification/run_ner.py \
    --max_seq_length  $MAX_LENGTH \
    --num_train_epochs $NUM_EPOCHS \
    --per_device_train_batch_size $BATCH_SIZE \
+   --per_device_eval_batch_size 32 \
    --save_steps $SAVE_STEPS \
    --seed $SEED \
    --loss_type $LOSS_TYPE \

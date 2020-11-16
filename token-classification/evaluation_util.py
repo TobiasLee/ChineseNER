@@ -37,8 +37,8 @@ def get_f1_score(pre_lines, gold_file="data/thuctc_valid.json"):
     sum = 0
     for label in labels:
         f = get_f1_score_label(pre_lines, gold_lines, label=label)
-        f_score[label] = f
-        sum += f
+        f_score[label] = f * 100
+        sum += f * 100
     avg = sum / len(labels)
     return f_score, avg
 
