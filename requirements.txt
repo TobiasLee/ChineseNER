@@ -19,3 +19,6 @@ fire
 pytest
 conllu
 sentencepiece != 0.1.92
+ray==0.8.7
+ray[tune]
+wandb
