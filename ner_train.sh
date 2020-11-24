@@ -1,9 +1,9 @@
-OUTPUT_DIR=results/roberta-large
+OUTPUT_DIR=results/roberta-large-bio
 BATCH_SIZE=8
 NUM_EPOCHS=10
 SAVE_STEPS=750
 SEED=888
-DATA_DIR=cluener_bios/
+DATA_DIR=cluener_bio/
 BERT_PATH=roberta-wwm-ext-large
 MAX_LENGTH=128
 LEARNING_RATE=3e-5 

@@ -353,7 +353,8 @@ def main():
                 for key, value in entity_f1_dict.items():
                     logger.info('%s: %.2f' % (key, value))
                     writer.write('%s: %.2f\n' % (key, value))
-            logger.info("Macro f1: %.2f" % marco_f1)
+                logger.info("Macro f1: %.2f" % marco_f1)
+                writer.write('Macro f1: %.2f\n' % marco_f1)
 
     return results
 

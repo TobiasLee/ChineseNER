@@ -1,5 +1,10 @@
 import json
 from collections import defaultdict
+import argparse
+import os
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--data_type', type=str, default='bio', choices=['bio', 'bios'], help='bio or bios')
 
 
 def get_f1_score_label(pre_lines, gold_lines, label="organization"):
@@ -96,7 +101,16 @@ def convert_bios_to_json_lines(file_name):
 
 
 if __name__ == '__main__':
+    args = parser.parse_args()
+    if args.data_type == 'bios':
+        file_dir = "cluener_bios"
+    elif args.data_type == 'bio':
+        file_dir = "cluener_bio"
+    else:
+        raise ValueError
     # test evaluation score
-    print(get_f1_score(pre_lines=[json.loads(line.strip()) for line in open("cluener_bios/dev.json") if line.strip()],
-          gold_file="cluener_bios/dev.json"))
-    print(get_f1_score(pre_lines=convert_bios_to_json_lines("cluener_bios/dev.txt"), gold_file="cluener_bios/dev.json"))
+    print(get_f1_score(
+        pre_lines=[json.loads(line.strip()) for line in open(os.path.join(file_dir, 'dev.json')) if line.strip()],
+        gold_file=os.path.join(file_dir, 'dev.json')))
+    print(get_f1_score(pre_lines=convert_bios_to_json_lines(os.path.join(file_dir, 'dev.txt')),
+                       gold_file=os.path.join(file_dir, 'dev.json')))

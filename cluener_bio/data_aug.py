@@ -3,7 +3,7 @@ import argparse
 import os
 import shutil
 
-data_augment_tag_list = ['address',
+data_augument_tag_list = ['address',
                           'book',
                           'company',
                           'game',
@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     ner = Ner(ner_dir_name='.',
               ignore_tag_list=['O'],
-              data_augment_tag_list=data_augment_tag_list,
+              data_augument_tag_list=data_augument_tag_list,
               augment_size=augment_size, seed=seed, dedup=dedup)
 
     aug_samples, aug_sample_tags = ner.augment(file_name='%s.txt' % file_name)

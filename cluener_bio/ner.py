@@ -118,10 +118,10 @@ class Ner:
         sentence_arr = []
         label_arr = []
         for i in range(len(ner_data)):
-            if len(ner_data[i][1]) == 1 and ner_data[i][0] != 'O':  # for S
-                label_arr.append('S-' + ner_data[i][0])
-                sentence_arr.append(ner_data[i][1])
-                continue
+            # if len(ner_data[i][1]) == 1 and ner_data[i][0] != 'O':  # for S
+            #     label_arr.append('S-' + ner_data[i][0])
+            #     sentence_arr.append(ner_data[i][1])
+            #     continue
             for j in range(len(ner_data[i][1])):
                 if ner_data[i][0] == 'O':
                     label_arr.append(ner_data[i][0])
