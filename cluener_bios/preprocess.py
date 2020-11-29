@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 
 
 def read_json(input_file):
@@ -47,9 +48,14 @@ files = [k + '.json' for k in ['dev', 'test', 'train']]
 # files = ['train.json']
 for f in files:
     lines = read_json(f)
+    label_analysis = defaultdict(int)
     for l in lines:
         w, l = l['words'], l['labels']
+        for tok, lbl in zip(w, l):
+            label_analysis[lbl] += 1
         with open(f.replace(".json", ".txt"), "w") as fw:
             for tok, lbl in zip(w, l):
                 fw.write(tok + " " + lbl + "\n")
             fw.write("\n")
+    print(f)
+    print(label_analysis)

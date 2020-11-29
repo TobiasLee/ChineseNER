@@ -5,6 +5,8 @@ import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--data_type', type=str, default='bio', choices=['bio', 'bios'], help='bio or bios')
+parser.add_argument('--case_study', action='store_true', default=False)
+parser.add_argument('--model_path', type=str, default='/home/renshuhuai/ChineseNER/results/bert-base-ls')
 
 
 def get_f1_score_label(pre_lines, gold_lines, label="organization"):
@@ -108,9 +110,16 @@ if __name__ == '__main__':
         file_dir = "cluener_bio"
     else:
         raise ValueError
-    # test evaluation score
-    print(get_f1_score(
-        pre_lines=[json.loads(line.strip()) for line in open(os.path.join(file_dir, 'dev.json')) if line.strip()],
-        gold_file=os.path.join(file_dir, 'dev.json')))
-    print(get_f1_score(pre_lines=convert_bios_to_json_lines(os.path.join(file_dir, 'dev.txt')),
-                       gold_file=os.path.join(file_dir, 'dev.json')))
+    if args.case_study:
+        output_test_predictions_file = os.path.join(args.model_path, "test_predictions.txt")
+        prediction_json_lines = convert_bios_to_json_lines(output_test_predictions_file)
+        with open(os.path.join(args.model_path, 'prediction.json'), 'w') as f:
+            for example in prediction_json_lines:
+                f.write(str(example) + '\n')
+    else:
+        # test evaluation score
+        print(get_f1_score(
+            pre_lines=[json.loads(line.strip()) for line in open(os.path.join(file_dir, 'dev.json')) if line.strip()],
+            gold_file=os.path.join(file_dir, 'dev.json')))
+        print(get_f1_score(pre_lines=convert_bios_to_json_lines(os.path.join(file_dir, 'dev.txt')),
+                           gold_file=os.path.join(file_dir, 'dev.json')))
