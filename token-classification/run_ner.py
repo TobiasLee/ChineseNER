@@ -24,7 +24,7 @@ import torch
 import numpy as np
 from seqeval.metrics import accuracy_score, f1_score, precision_score, recall_score
 from torch import nn
-from losses import DiceLoss, FocalLoss, LabelSmoothingCrossEntropy
+from losses import DiceLoss, FocalLoss, LabelSmoothingCrossEntropy, CourageLoss
 from torch.nn import CrossEntropyLoss
 
 from transformers import (
@@ -70,6 +70,9 @@ class ModelArguments:
     loss_type: Optional[str] = field(
         default='CrossEntropyLoss', metadata={"help": "The loss used during training."}
     )
+    loss_gamma: Optional[float] = field(
+        default=2, metadata={"help": "The gamma of Focal loss etc."}
+    )
 
 
 @dataclass
@@ -98,17 +101,19 @@ class DataTrainingArguments:
 
 
 class TrainerWithSpecifiedLoss(Trainer):
-    def __init__(self, model, args, train_dataset, eval_dataset, compute_metrics, loss_type):
+    def __init__(self, model, args, train_dataset, eval_dataset, compute_metrics, loss_type, loss_gamma):
         Trainer.__init__(self, model=model, args=args, train_dataset=train_dataset, eval_dataset=eval_dataset,
                          compute_metrics=compute_metrics)
         if loss_type == 'DiceLoss':
             self.loss_fct = DiceLoss()
         elif loss_type == 'FocalLoss':
-            self.loss_fct = FocalLoss()
+            self.loss_fct = FocalLoss(gamma=loss_gamma)
         elif loss_type == 'LabelSmoothingCrossEntropy':
             self.loss_fct = LabelSmoothingCrossEntropy()
         elif loss_type == 'CrossEntropyLoss':
             self.loss_fct = CrossEntropyLoss()
+        elif loss_type == 'CourageLoss':
+            self.loss_fct = CourageLoss(gamma=loss_gamma)
         else:
             raise ValueError("Doesn't support such loss type")
 
@@ -276,7 +281,8 @@ def main():
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
         compute_metrics=compute_metrics,
-        loss_type=model_args.loss_type
+        loss_type=model_args.loss_type,
+        loss_gamma=model_args.loss_gamma
     )
 
     # Training
