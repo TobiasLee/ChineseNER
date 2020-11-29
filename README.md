@@ -55,11 +55,4 @@
 
 |                                    | address | book  | company | game  | government | movie | name  | organization | position | scene | Macro f1 |
 | ---------------------------------- | ------- | ----- | ------- | ----- | ---------- | ----- | ----- | ------------ | -------- | ----- | -------- |
-| BERT+Softmax+CE_loss               |         |       |         |       |            |       |       |              |          |       |          |
-| BERT+Softmax+Focal_loss            |         |       |         |       |            |       |       |              |          |       |          |
-| BERT+Softmax+Label_Smoothing       |         |       |         |       |            |       |       |              |          |       |          |
-| BERT+Softmax+CE+DA_wo_ori          |         |       |         |       |            |       |       |              |          |       |          |
-| BERT+Softmax+CE+outside            |         |       |         |       |            |       |       |              |          |       |          |
-| BERT+Softmax+CE+outside+dedup_DA_3 |         |       |         |       |            |       |       |              |          |       |          |
-| RoBERTa+Softmax+CE+outside         |         |       |         |       |            |       |       |              |          |       |          |
 | RoBERTa-large+Softmax+CE+outside   | 65.44   | 81.48 | 80.38   | 84.35 | 80.24      | 84.46 | 88.59 | 77.68        | 80.00    | 73.33 | 79.60    |
