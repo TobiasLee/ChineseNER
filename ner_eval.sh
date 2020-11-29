@@ -1,7 +1,7 @@
 BATCH_SIZE=32
 SEED=888
 DATA_DIR=cluener_bios/
-BERT_PATH=results/bert-base/
+BERT_PATH=results/bert-base
 MAX_LENGTH=128
 LOSS_TYPE=CrossEntropyLoss
 python3 token-classification/run_ner.py \
