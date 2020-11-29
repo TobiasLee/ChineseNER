@@ -38,7 +38,7 @@ from transformers import (
     set_seed,
 )
 from utils_ner import Split, TokenClassificationDataset, TokenClassificationTask
-
+from evaluation_util import * 
 
 logger = logging.getLogger(__name__)
 
@@ -268,10 +268,10 @@ def main():
     def compute_metrics(p: EvalPrediction) -> Dict:
         preds_list, out_label_list = align_predictions(p.predictions, p.label_ids)
         return {
-            "accuracy_score": accuracy_score(out_label_list, preds_list),
-            "precision": precision_score(out_label_list, preds_list),
-            "recall": recall_score(out_label_list, preds_list),
-            "f1": f1_score(out_label_list, preds_list),
+            "accuracy_score": accuracy_score(out_label_list, preds_list) * 100,
+            "precision": precision_score(out_label_list, preds_list) * 100,
+            "recall": recall_score(out_label_list, preds_list) * 100,
+            "f1": f1_score(out_label_list, preds_list) * 100,
         }
 
     # Initialize our Trainer
@@ -308,10 +308,22 @@ def main():
             with open(output_eval_file, "w") as writer:
                 logger.info("***** Eval results *****")
                 for key, value in result.items():
-                    logger.info("  %s = %s", key, value)
-                    writer.write("%s = %s\n" % (key, value))
+                    logger.info("  %s = %.2f", key, value)
+                    writer.write("%s = %.2f\n" % (key, value))
 
             results.update(result)
+
+        # log config
+        with open(output_eval_file, "a") as writer:
+            hyper_params = str(
+                torch.load(open(os.path.join(training_args.output_dir, "training_args.bin"), 'rb'))).split(',')
+            for i, para in enumerate(hyper_params):
+                if i == 0:
+                    para = para.replace("TrainingArguments(", '')
+                if i == len(hyper_params) - 1:
+                    para = para.replace(")", '')
+                para = para.replace(' ', '')
+                writer.write(para + '\n')
 
     # Predict
     if training_args.do_predict:
@@ -329,19 +341,26 @@ def main():
         predictions, label_ids, metrics = trainer.predict(test_dataset)
         preds_list, _ = align_predictions(predictions, label_ids)
 
-        output_test_results_file = os.path.join(training_args.output_dir, "test_results.txt")
-        if trainer.is_world_master():
-            with open(output_test_results_file, "w") as writer:
-                for key, value in metrics.items():
-                    logger.info("  %s = %s", key, value)
-                    writer.write("%s = %s\n" % (key, value))
-
         # Save predictions
+        output_test_results_file = os.path.join(training_args.output_dir, "test_results.txt")
         output_test_predictions_file = os.path.join(training_args.output_dir, "test_predictions.txt")
         if trainer.is_world_master():
             with open(output_test_predictions_file, "w") as writer:
                 with open(os.path.join(data_args.data_dir, "test.txt"), "r") as f:
                     token_classification_task.write_predictions_to_file(writer, f, preds_list)
+            logger.info("running CLUENER2020 Evaluation")
+            # evaluate according to CLUENER2020
+            prediction_json_lines = convert_bios_to_json_lines(output_test_predictions_file)
+            logger.info(prediction_json_lines[:5])
+            entity_f1_dict, marco_f1 = get_f1_score(pre_lines=prediction_json_lines,
+                                                gold_file=os.path.join(data_args.data_dir, "dev.json"))
+
+            with open(output_test_results_file, "w") as writer:
+                for key, value in entity_f1_dict.items():
+                    logger.info('%s: %.2f' % (key, value))
+                    writer.write('%s: %.2f\n' % (key, value))
+                logger.info("Macro f1: %.2f" % marco_f1)
+                writer.write('Macro f1: %.2f\n' % marco_f1)
 
     return results
 
