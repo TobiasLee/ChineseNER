@@ -1,6 +1,6 @@
 # ChineseNER
 
-
+CLUENER 2020 ChineseNER with BERT(RoBERTa). 
 
 ## Prepare environment
 ```bash
