@@ -11,9 +11,12 @@
 ```
 ## Download pre-trained Chinese BERT
 
-> sh download.sh 
+> sh download.sh bert-base
+
+Change `bert-base` to `roberta-base` and `roberta-large ` as you need.
 
 ## Train & eval with BIOS metric
+
 > sh ner_train.sh 
 
 ## Eval with official metric
